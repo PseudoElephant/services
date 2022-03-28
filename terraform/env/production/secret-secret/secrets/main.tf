@@ -13,12 +13,20 @@ provider "aws" {
   region  = var.region
 }
 
+module "ecr" {
+  source = "./ecr"
+}
+
 module "lambda" {
   source = "./lambda"
 
-  region     = var.region
-  account_id = var.account_id
-  iam_module = module.iam.data
+  depends_on = [module.ecr]
+
+  region          = var.region
+  account_id      = var.account_id
+  iam_module      = module.iam.data
+  repository_url  = module.ecr.data.repository_url
+  repository_name = module.ecr.data.name
 }
 
 module "iam" {
