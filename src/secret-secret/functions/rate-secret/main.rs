@@ -5,7 +5,10 @@ use lambda_runtime::{handler_fn, Context, Error};
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {
-  simple_logger::init_with_env().unwrap();
+  simple_logger::SimpleLogger::new()
+    .with_utc_timestamps()
+    .init()
+    .unwrap();
 
   let func = handler_fn(func);
   lambda_runtime::run(func).await?;
