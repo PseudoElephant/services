@@ -1,0 +1,15 @@
+[package]
+name = "aws-sqs"
+version = "0.1.0"
+edition = "2021"
+autobins = false
+
+[dependencies]
+aws-smithy-client = {version = "0.39.0", features = [ "test-util" ] }
+aws-smithy-http = "0.39.0"
+aws-config = "0.9.0"
+aws-sdk-sqs = "0.9.0"
+aws-types = "0.9.0"
+tokio = { version = "0.2.22", features = ["full"] }
+http = "0.2.5"
+async-trait = "0.1"
