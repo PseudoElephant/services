@@ -9,3 +9,6 @@ resource "aws_sqs_queue" "review_secret" {
 }
 
 # COULD SETUP DLQ
+output "review_secret" {
+  value = aws_sqs_queue.review_secret
+}

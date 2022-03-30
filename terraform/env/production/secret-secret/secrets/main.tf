@@ -27,10 +27,14 @@ module "lambda" {
   iam_module      = module.iam.data
   repository_url  = module.ecr.data.repository_url
   repository_name = module.ecr.data.name
+  sqs_module      = module.sqs.data
 }
 
 module "iam" {
   source = "./iam"
+
+  region     = var.region
+  account_id = var.account_id
 }
 
 module "dynamodb" {

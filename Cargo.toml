@@ -1,27 +1,8 @@
-[package]
-name = "services"
-version = "0.1.0"
-edition = "2021"
-autobins = false
+[workspace]
+members = [
+  # ALL SECRET SECRET Functions
+  "src/secret-secret/functions/*",
+  "src/secret-secret/models",
+  "src/shared/aws/*"
+  ]
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
-[[bin]]
-name = "create-secret"
-path = "src/secret-secret/functions/create-secret/main.rs"
-
-[[bin]]
-name = "get-secret"
-path = "src/secret-secret/functions/get-secret/main.rs"
-
-[[bin]]
-name = "rate-secret"
-path = "src/secret-secret/functions/rate-secret/main.rs"
-
-[dependencies]
-lambda_runtime = "0.4.1"
-log = "0.4.14"
-simple_logger = "1.13.0"
-tokio = "1.12.0"
-aws_lambda_events = "0.5.0"
-http = "0.2.5"

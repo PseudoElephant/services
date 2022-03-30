@@ -6,4 +6,5 @@ module "functions" {
   iam_module      = var.iam_module
   repository_url  = var.repository_url
   repository_name = var.repository_name
+  sqs_module      = var.sqs_module
 }

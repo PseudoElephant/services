@@ -10,6 +10,10 @@ variable "iam_module" {
 
 }
 
+variable "sqs_module" {
+
+}
+
 variable "repository_url" {
   type = string
 }
