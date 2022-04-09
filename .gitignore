@@ -32,3 +32,6 @@ override.tf.json
 # Added by cargo
 
 **/target
+
+# Python
+**/__pycache__

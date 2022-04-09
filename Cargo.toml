@@ -1,7 +1,9 @@
 [workspace]
 members = [
   # ALL SECRET SECRET Functions
-  "src/secret-secret/functions/*",
+  "src/secret-secret/functions/create-secret",
+  "src/secret-secret/functions/get-secret",
+  "src/secret-secret/functions/rate-secret",
   "src/secret-secret/models",
   "src/shared/aws/*"
   ]

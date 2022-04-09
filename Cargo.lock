@@ -893,17 +893,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "lambda_sqs"
-version = "0.2.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a52d8c59fc7ceceebcc4ea80341414744879e03c88eedc1fccb91038063b0bd4"
-dependencies = [
- "lambda_runtime",
- "serde",
- "serde_json",
-]
-
-[[package]]
 name = "lazy_static"
 version = "1.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1342,22 +1331,6 @@ dependencies = [
  "aws_lambda_events",
  "http",
  "lambda_runtime",
- "log",
- "secret-secret_models",
- "serde",
- "serde_json",
- "simple_logger",
- "tokio 1.17.0",
-]
-
-[[package]]
-name = "secret-secret_reviews-secret"
-version = "0.1.0"
-dependencies = [
- "aws-config",
- "aws_lambda_events",
- "http",
- "lambda_sqs",
  "log",
  "secret-secret_models",
  "serde",

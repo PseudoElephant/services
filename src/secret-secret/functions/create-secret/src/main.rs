@@ -72,7 +72,7 @@ async fn process(req: Request) -> Result<ApiGatewayProxyResponse, Error> {
     let data = req.event.body.unwrap_or_default();
 
     // Log body
-    log::info!("Data received: {} ", data,);
+    log::info!("Data received: {} ", data);
 
     let unmarshal: Result<RequestPayload, serde_json::Error> = serde_json::from_str(&data);
     if unmarshal.is_err() {
