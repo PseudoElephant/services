@@ -1,0 +1,18 @@
+# # Files that should not be added to the build context
+.git
+.terraform
+.target
+.vscode
+
+# # Remove Dashboard
+src/secret-secret/dashboard
+
+
+README.md
+
+# remove docker files
+scripts/
+
+# Only add python function ( remove python code )
+src/secret-secret/functions/review-secret
+

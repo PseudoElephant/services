@@ -38,7 +38,7 @@ resource "aws_iam_policy" "review_secret_policy" {
             "Action": [
               "dynamodb:PutItem",
               "dynamodb:BatchWriteItem"
-            ],
+            ],  
             "Resource": "arn:aws:dynamodb:${var.region}:${var.account_id}:table/secrets-table"
         }
   ]

@@ -2,7 +2,7 @@ FROM rust:latest as build
 ARG binary
 WORKDIR /usr/src/api-service/target
 COPY . .
-RUN cargo install --path ../src/secret-secret/functions/${binary}/ --release
+RUN cargo install --path ./src/secret-secret/functions/${binary}/
 
 FROM gcr.io/distroless/cc-debian10
 ARG binary

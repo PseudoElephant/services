@@ -1,0 +1,20 @@
+# # Files that should not be added to the build context
+.git
+.terraform
+.target
+.vscode
+
+# # Remove rust files
+Cargo.lock
+Cargo.toml
+
+# # Remove Dashboard
+src/secret-secret/dashboard
+
+README.md
+
+# remove docker files
+scripts/
+
+# Only add python function ( Could improve )
+!src/secret-secret/functions/review-secret
