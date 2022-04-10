@@ -39,3 +39,8 @@ variable "repository_url" {
 variable "repository_name" {
   type = string
 }
+
+variable "language" {
+  type    = string
+  default = "rust"
+}

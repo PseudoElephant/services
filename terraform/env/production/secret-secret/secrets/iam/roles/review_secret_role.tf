@@ -32,6 +32,14 @@ resource "aws_iam_policy" "review_secret_policy" {
                 "sqs:GetQueueAttributes"
             ],
             "Resource": "arn:aws:sqs:${var.region}:${var.account_id}:review-secret-queue"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+              "dynamodb:PutItem",
+              "dynamodb:BatchWriteItem"
+            ],
+            "Resource": "arn:aws:dynamodb:${var.region}:${var.account_id}:table/secrets-table"
         }
   ]
 }

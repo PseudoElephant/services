@@ -7,9 +7,9 @@ module "review_secret_lambda" {
   role            = var.iam_module.review_secret_role
   repository_url  = var.repository_url
   repository_name = var.repository_name
-
-  region     = var.region
-  account_id = var.account_id
+  language        = "python"
+  region          = var.region
+  account_id      = var.account_id
 }
 
 resource "aws_lambda_event_source_mapping" "event_source_mapping" {

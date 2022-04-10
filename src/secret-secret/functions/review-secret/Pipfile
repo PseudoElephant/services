@@ -4,8 +4,11 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
+sklearn = "*"
+boto3 = "*"
 
 [dev-packages]
+moto = "*"
 
 [requires]
 python_version = "3.8"

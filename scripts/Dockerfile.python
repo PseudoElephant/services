@@ -1,0 +1,16 @@
+FROM public.ecr.aws/lambda/python:3.8
+
+ARG lambda_name
+
+# Copy Functions Code
+COPY ./src/secret-secret/functions/${lambda_name}/src/main.py .
+
+# Copy models
+COPY ./src/secret-secret/functions/${lambda_name}/models /opt/models/
+
+# Install the function's dependencies using file requirements.txt
+# from your project folder.
+COPY ./src/secret-secret/functions/${lambda_name}/requirements.txt .
+RUN  pip3 install -r requirements.txt --target .
+
+CMD [ "main.lambda_handler" ]
