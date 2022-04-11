@@ -4,47 +4,121 @@
       <span>Secret</span><span> <v-icon dark x-large> mdi-lock </v-icon></span
       ><span>Secret</span>
     </div>
-    <v-textarea
-      class="textarea"
-      counter="300"
-      no-resize
-      rows="5"
-      dark
-      shaped
-      filled
-      v-model="secretMessage"
-    ></v-textarea>
-    <div class="home__controls">
-      <v-btn icon color="pink" @click="toggleSecretView">
-        <v-icon dark> mdi-heart </v-icon></v-btn
-      >
+    <!-- Try to use forms in vue, see how it works -->
+    <v-form v-model="valid">
+      <v-textarea
+        v-if="!isSendSecretView"
+        class="textarea"
+        placeholder="A juicy secret goes here..."
+        :rules="[validateText]"
+        :counter="maxlength"
+        :maxlength="maxlength"
+        no-resize
+        rows="10"
+        dark
+        shaped
+        filled
+        v-model="secretMessage"
+      />
+      <!-- TODO: Review if necesary to have to textareas -->
+      <v-textarea
+        v-else
+        class="textarea"
+        no-resize
+        rows="10"
+        dark
+        shaped
+        filled
+        readonly
+        v-model="secretMessage"
+      />
+    </v-form>
+    <v-progress-circular
+      indeterminate
+      color="primary"
+      v-if="loading"
+    ></v-progress-circular>
+    <div class="controls">
+      <div class="controls_social">
+        <v-btn icon> <v-icon> mdi-facebook </v-icon></v-btn>
+        <v-btn icon> <v-icon> mdi-whatsapp </v-icon></v-btn>
+        <v-btn icon> <v-icon> mdi-instagram </v-icon></v-btn>
+        <v-btn icon> <v-icon> mdi-atom-variant </v-icon></v-btn>
+      </div>
+      <div class="controls__likes">
+        <v-btn icon @click="toggleSecretView" :disabled="!valid">
+          <v-icon> mdi-cards-heart-outline </v-icon></v-btn
+        >
+        {{ secret.likes }}
+      </div>
     </div>
   </div>
 </template>
 
 <script lang="ts">
 import Vue from "vue";
+import { mapActions, mapState } from "vuex";
 
 export default Vue.extend({
   name: "Home",
   data() {
     return {
+      maxlength: 300,
       isSendSecretView: false,
       secretMessage: "",
+      valid: false,
     };
   },
+  computed: {
+    ...mapState("secrets", ["secret"]),
+    ...mapState("config", ["loading"]),
+  },
   methods: {
+    ...mapActions("secrets", ["fetchSecret", "setSecret", "createSecret"]),
+    validateText(text: string): boolean | string {
+      if (text == "") {
+        return "Secret can't be empty.";
+      }
+
+      return true;
+    },
     toggleSecretView() {
+      // Clear State
+      this.setSecret({});
+
+      if (!this.isSendSecretView) {
+        // Create secret
+        this.createSecret({ message: this.secretMessage }); // don't wait
+        // load random secret
+        this.fetchSecret();
+      }
+
       this.isSendSecretView = !this.isSendSecretView;
-      console.log(this.secretMessage);
+    },
+  },
+  watch: {
+    secret(value) {
+      this.secretMessage = value.message;
     },
   },
 });
 </script>
 
-<style>
+<style lang="scss">
+div[role="progressbar"] {
+  margin: 0 !important;
+}
+
+.v-progress-circular__overlay {
+  stroke: rgb(216, 175, 238) !important;
+}
+
+.v-messages__message {
+  color: rgb(241, 85, 85);
+}
+
 .v-btn > .v-btn__content .v-icon {
-  color: rgb(236, 16, 71) !important;
+  color: var(--light-color-1) !important;
 }
 
 textarea {
@@ -117,6 +191,18 @@ body::-webkit-scrollbar-button {
 
   &--post::before {
     opacity: 1;
+  }
+}
+
+.controls {
+  display: flex;
+  justify-content: space-between;
+
+  &__likes {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    color: var(--light-color-1);
   }
 }
 

@@ -2,6 +2,12 @@ resource "aws_apigatewayv2_api" "http_api" {
   name          = var.name
   description   = var.description
   protocol_type = "HTTP"
+  cors_configuration {
+    allow_origins = ["http://localhost:8080"]
+    allow_methods = ["POST", "GET", "OPTIONS"]
+    allow_headers = ["content-type"]
+    max_age       = 30
+  }
 }
 
 resource "aws_cloudwatch_log_group" "api_log_group" {
