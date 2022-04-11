@@ -1,7 +1,9 @@
 <template>
   <div :class="['home', { 'home--post': isSendSecretView }]">
     <div class="title">
-      <span>Secret</span><span> <v-icon dark x-large> mdi-lock </v-icon></span
+      <span>Secret</span
+      ><span
+        ><Lock :class="['lock', { 'lock--open': isSendSecretView }]" /></span
       ><span>Secret</span>
     </div>
     <!-- Try to use forms in vue, see how it works -->
@@ -57,10 +59,14 @@
 
 <script lang="ts">
 import Vue from "vue";
+import Lock from "@/assets/icons/OpenLock.svg";
 import { mapActions, mapState } from "vuex";
 
 export default Vue.extend({
   name: "Home",
+  components: {
+    Lock,
+  },
   data() {
     return {
       maxlength: 300,
@@ -206,21 +212,32 @@ body::-webkit-scrollbar-button {
   }
 }
 
-// SVG animation
-// .lock-icon {
-//   &:nth-child {
-//     animation: growShrink 2s ease-in;
-//   }
-// }
+.lock {
+  width: 7%;
 
-// @keyframes growShrink {
-//   0% {
-//     height: 100%;
-//   }
-//   100% {
-//     height: 0;
-//   }
-// }
+  > * {
+    fill: var(--light-color-1);
+    transition: transform 0.3s ease-in-out;
+  }
+
+  > .head {
+    transform: translateY(11.09%);
+  }
+
+  > .sbody {
+    transform: translateY(-5.47%);
+  }
+
+  &--open {
+    > .head {
+      transform: translateY(0%);
+    }
+
+    > .sbody {
+      transform: translateY(0%);
+    }
+  }
+}
 
 .title {
   // Apply to all children
@@ -236,6 +253,6 @@ body::-webkit-scrollbar-button {
     margin: 0 2rem;
   }
 
-  margin: auto;
+  text-align: center;
 }
 </style>

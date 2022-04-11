@@ -15,7 +15,7 @@ const store = new Vuex.Store({
 });
 
 // dispatch
-export const dispatch = (output: DispatchOutput<any>): void =>
+export const dispatch = (output: DispatchOutput<unknown>): void =>
   store.commit(output.type, output.payload);
 // getState
 export const getState = (): State => store.state;
