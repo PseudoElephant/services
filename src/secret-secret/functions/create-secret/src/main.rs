@@ -1,6 +1,7 @@
 use aws_lambda_events::encodings::Body;
 use aws_lambda_events::event::apigw::{ApiGatewayProxyRequest, ApiGatewayProxyResponse};
 use aws_sdk_sqs::Client;
+use cookie::Cookie;
 use http::header::HeaderMap;
 use lambda_runtime::{handler_fn, Context, Error};
 use serde::{Deserialize, Serialize};
@@ -34,12 +35,8 @@ async fn main() -> Result<(), Error> {
     Ok(())
 }
 
-fn handle_err<T>(err: T) -> Result<ApiGatewayProxyResponse, Error>
-where
-    T: std::error::Error,
-{
+fn handle_err(err: Error) -> Result<ApiGatewayProxyResponse, Error> {
     log::info!("Data received: {} ", err);
-
     let mut headers = HeaderMap::new();
     headers.insert("Content-Type", "application/json".parse().unwrap());
 
@@ -55,6 +52,17 @@ where
     };
 
     Ok(resp)
+}
+
+fn create_cookie<'a>(value: String) -> Cookie<'a> {
+    let cookie = Cookie::build("user_id", value)
+        .path("/secrets")
+        .secure(true)
+        .http_only(true) // Two weeks
+        .max_age(time::Duration::days(14))
+        .finish();
+
+    return cookie;
 }
 
 async fn init(event: ApiGatewayProxyRequest) -> Request {
@@ -74,13 +82,20 @@ async fn process(req: Request) -> Result<ApiGatewayProxyResponse, Error> {
     // Log body
     log::info!("Data received: {} ", data);
 
-    let unmarshal: Result<RequestPayload, serde_json::Error> = serde_json::from_str(&data);
-    if unmarshal.is_err() {
-        return handle_err(unmarshal.err().unwrap());
-    }
+    let default = &http::HeaderValue::from_str("invalid=FFF").unwrap();
+    // try to get cookie | could use get_all to get many cookies
+    let user_cookies: &http::HeaderValue = req.event.headers.get("set-cookie").unwrap_or(default);
 
-    let payload: RequestPayload = unmarshal.unwrap();
-    let filled_secret = models::secrets::new(payload.message, payload.user_id);
+    let cookie: cookie::Cookie = cookie::Cookie::parse(user_cookies.to_str().unwrap_or(""))?;
+
+    let user_id: Option<String> = if cookie.name() == "user_id" {
+        Some(String::from(cookie.value()))
+    } else {
+        None
+    };
+    let payload: RequestPayload = serde_json::from_str(&data)?;
+
+    let filled_secret = models::secrets::new(payload.message, user_id.clone());
 
     let secret_json = serde_json::json!(filled_secret).to_string();
 
@@ -97,6 +112,11 @@ async fn process(req: Request) -> Result<ApiGatewayProxyResponse, Error> {
     let mut headers = HeaderMap::new();
     headers.insert("Content-Type", "application/json".parse().unwrap());
 
+    if user_id.is_none() {
+        let cookie: String = create_cookie(filled_secret.user_id.unwrap().to_string()).to_string();
+        headers.insert("set-cookie", cookie.parse().unwrap());
+    }
+
     let resp = ApiGatewayProxyResponse {
         status_code: 200,
         headers: headers,
@@ -112,7 +132,12 @@ async fn handler(
     _: Context,
 ) -> Result<ApiGatewayProxyResponse, Error> {
     let request = init(req).await;
-    return process(request).await;
+    let response = process(request).await;
+
+    match response {
+        Ok(r) => Ok(r),
+        Err(e) => handle_err(e),
+    }
 }
 
 #[cfg(test)]
@@ -157,9 +182,11 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_handler_success() {
+    async fn test_handler_success_w_cookie() {
+        let mut headers = HeaderMap::new();
+        headers.insert("set-cookie", "user_id=98981fb6-a128-459e-95c6-4d6d84f23bca; HttpOnly; Secure; Path=/secrets; Max-Age=1209600".parse().unwrap());
         let apigw = ApiGatewayProxyRequest {
-            headers: HeaderMap::new(),
+            headers: headers,
             body: Some(
                 serde_json::json!({
                     "message" : "Hello"
@@ -203,7 +230,62 @@ mod tests {
         assert_eq!(
             response.headers.get("Content-Type").unwrap(),
             "application/json"
-        )
+        );
+
+        assert_eq!(response.headers.get("set-cookie"), None)
+    }
+
+    #[tokio::test]
+    async fn test_handler_success_n_cookie() {
+        let headers = HeaderMap::new();
+        let apigw = ApiGatewayProxyRequest {
+            headers: headers,
+            body: Some(
+                serde_json::json!({
+                    "message" : "Hello"
+                })
+                .to_string(),
+            ),
+            http_method: http::Method::POST,
+            is_base64_encoded: Some(false),
+            multi_value_headers: HeaderMap::new(),
+            multi_value_query_string_parameters: HashMap::new(),
+            path_parameters: HashMap::new(),
+            query_string_parameters: HashMap::new(),
+            path: Some("/secrets".to_string()),
+            request_context:
+                aws_lambda_events::event::apigw::ApiGatewayProxyRequestContext::default(),
+            resource: None,
+            stage_variables: HashMap::new(),
+        };
+
+        // SQS Mocks
+        let mocks = [mock::MockFile {
+            request_body: "{ \"message\": \"Hello World\" }",
+            response_file: "send-message.xml",
+        }];
+
+        let sqs_client = mock::mock_client(&mocks);
+
+        let req = Request {
+            event: apigw,
+            client: sqs_client,
+        };
+
+        let result = process(req).await;
+        assert!(result.is_ok());
+        let response: ApiGatewayProxyResponse = result.unwrap();
+        assert_eq!(
+            response.status_code.to_string(),
+            http::StatusCode::OK.as_str()
+        );
+
+        assert_eq!(
+            response.headers.get("Content-Type").unwrap(),
+            "application/json"
+        );
+
+        assert_ne!(response.headers.get("set-cookie"), None)
     }
 
     #[tokio::test]
@@ -238,17 +320,11 @@ mod tests {
         };
 
         let result = process(req).await;
-        assert!(result.is_ok());
-        let response: ApiGatewayProxyResponse = result.unwrap();
+        let err = result.err().unwrap();
         assert_eq!(
-            response.status_code.to_string(),
-            http::StatusCode::from_u16(400).unwrap().as_str()
+            err.to_string(),
+            "EOF while parsing a value at line 1 column 0"
         );
-
-        assert_eq!(
-            response.headers.get("Content-Type").unwrap(),
-            "application/json"
-        )
     }
 
     #[tokio::test]
@@ -283,24 +359,10 @@ mod tests {
         };
 
         let result = process(req).await;
-        assert!(result.is_ok());
-        let response: ApiGatewayProxyResponse = result.unwrap();
+        let err = result.err().unwrap();
         assert_eq!(
-            response.status_code.to_string(),
-            http::StatusCode::from_u16(400).unwrap().as_str()
+            err.to_string(),
+            "missing field `message` at line 1 column 2"
         );
-        assert_eq!(
-            response.body.unwrap(),
-            Body::Text(
-                serde_json::json!({
-                    "message" : "missing field `message` at line 1 column 2"
-                })
-                .to_string()
-            )
-        );
-        assert_eq!(
-            response.headers.get("Content-Type").unwrap(),
-            "application/json"
-        )
     }
 }

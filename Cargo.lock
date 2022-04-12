@@ -518,6 +518,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "cookie"
+version = "0.11.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "80f6044740a4a516b8aac14c140cdf35c1a640b1bd6b98b6224e49143b2f1566"
+dependencies = [
+ "time 0.1.44",
+]
+
+[[package]]
 name = "core-foundation"
 version = "0.9.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1349,6 +1358,7 @@ dependencies = [
  "aws-sqs",
  "aws-types",
  "aws_lambda_events",
+ "cookie",
  "http",
  "lambda_runtime",
  "log",
@@ -1356,6 +1366,7 @@ dependencies = [
  "serde",
  "serde_json",
  "simple_logger",
+ "time 0.1.44",
  "tokio 1.17.0",
 ]
 

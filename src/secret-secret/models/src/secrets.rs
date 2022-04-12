@@ -23,7 +23,7 @@ pub fn new(message: String, user_id: Option<String>) -> Secret {
 
     Secret {
         secret_id: Some(uuid::Uuid::new_v4()),
-        user_id: Some(id.unwrap_or_default()),
+        user_id: Some(id.unwrap_or(uuid::Uuid::new_v4())),
         message: message,
         likes: Some(0),
         dislikes: Some(0),
