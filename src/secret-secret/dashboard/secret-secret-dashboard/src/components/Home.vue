@@ -1,172 +1,76 @@
 <template>
-  <div :class="['home', { 'home--post': isSendSecretView }]">
+  <div :class="['home', { 'home--post': !creatingSecret }]">
+    <!-- Secret Secret Title -->
     <div class="title">
-      <span>Secret</span
-      ><span
-        ><Lock :class="['lock', { 'lock--open': isSendSecretView }]" /></span
+      <span>Secret</span><span><Lock :opened="!creatingSecret" /></span
       ><span>Secret</span>
     </div>
-    <!-- Try to use forms in vue, see how it works -->
-    <v-form v-model="valid">
-      <v-textarea
-        v-if="!isSendSecretView"
-        class="textarea"
-        placeholder="A juicy secret goes here..."
-        :rules="[validateText]"
-        :counter="maxlength"
-        :maxlength="maxlength"
-        no-resize
-        rows="10"
-        dark
-        shaped
-        filled
-        v-model="secretMessage"
-      />
-      <!-- TODO: Review if necesary to have to textareas -->
-      <v-textarea
-        v-else
-        class="textarea"
-        no-resize
-        rows="10"
-        dark
-        shaped
-        filled
-        readonly
-        v-model="secretMessage"
-      />
-    </v-form>
-    <v-progress-circular
-      indeterminate
-      color="primary"
-      v-if="loading"
-    ></v-progress-circular>
-    <div class="controls">
-      <div class="controls_social">
-        <v-btn icon> <v-icon> mdi-facebook </v-icon></v-btn>
-        <v-btn icon> <v-icon> mdi-whatsapp </v-icon></v-btn>
-        <v-btn icon> <v-icon> mdi-instagram </v-icon></v-btn>
-        <v-btn icon> <v-icon> mdi-atom-variant </v-icon></v-btn>
-      </div>
-      <div class="controls__likes">
-        <v-btn icon @click="toggleSecretView" :disabled="!valid">
-          <v-icon> mdi-cards-heart-outline </v-icon></v-btn
-        >
-        {{ secret.likes }}
-      </div>
-    </div>
+ 
+    <!-- Secret Secret Textarea -->
+    <CreateSecret v-if="creatingSecret" @sent="sentSecret" />
+
+    <SecretCard v-else />
+
+<!-- Google Ad -->
+    <!-- <GoogleAdSense adSlot="2612580659" addFormat="rspv"/> -->
   </div>
 </template>
 
 <script lang="ts">
 import Vue from "vue";
-import Lock from "@/assets/icons/OpenLock.svg";
+import Lock from "@/components/Lock.vue";
+import SecretCard from "@/components/secrets/SecretCard.vue";
+import CreateSecret from "@/components/secrets/CreateSecret.vue";
+// import GoogleAdSense from "@/components/ads/GoogleAdSense.vue"
 import { mapActions, mapState } from "vuex";
 
 export default Vue.extend({
   name: "Home",
   components: {
     Lock,
+    SecretCard,
+    CreateSecret,
+    // GoogleAdSense
   },
   data() {
     return {
-      maxlength: 300,
-      isSendSecretView: false,
-      secretMessage: "",
+      creatingSecret: true,
       valid: false,
     };
   },
   computed: {
-    ...mapState("secrets", ["secret"]),
     ...mapState("config", ["loading"]),
   },
   methods: {
-    ...mapActions("secrets", ["fetchSecret", "setSecret", "createSecret"]),
-    validateText(text: string): boolean | string {
-      if (text == "") {
-        return "Secret can't be empty.";
-      }
-
-      return true;
+    sentSecret() {
+      this.creatingSecret = false;
     },
-    toggleSecretView() {
-      // Clear State
-      this.setSecret({});
-
-      if (!this.isSendSecretView) {
-        // Create secret
-        this.createSecret({ message: this.secretMessage }); // don't wait
-        // load random secret
-        this.fetchSecret();
-      }
-
-      this.isSendSecretView = !this.isSendSecretView;
-    },
-  },
-  watch: {
-    secret(value) {
-      this.secretMessage = value.message;
-    },
-  },
+  }
 });
 </script>
 
 <style lang="scss">
-div[role="progressbar"] {
-  margin: 0 !important;
-}
-
-.v-progress-circular__overlay {
-  stroke: rgb(216, 175, 238) !important;
-}
-
-.v-messages__message {
-  color: rgb(241, 85, 85);
-}
 
 .v-btn > .v-btn__content .v-icon {
   color: var(--light-color-1) !important;
-}
-
-textarea {
-  font-size: 2rem !important;
-  line-height: 3rem !important;
-}
-
-textarea::-webkit-scrollbar {
-  background-color: rgba(255, 255, 255, 0);
-  width: 12px;
-}
-
-/* background of the scrollbar except button or resizer */
-textarea::-webkit-scrollbar-track {
-  background-color: rgba(255, 255, 255, 0);
-}
-
-/* scrollbar itself */
-textarea::-webkit-scrollbar-thumb {
-  background-color: #babac049;
-  border-radius: 16px;
-  border: 1px solid #fff;
-}
-
-/* set button(top and bottom of the scrollbar) */
-body::-webkit-scrollbar-button {
-  display: none;
 }
 </style>
 
 <style lang="scss" scoped>
 .home {
   width: 100%;
-  height: 100vh;
+  min-height: 100vh;
+  height: auto;
 
   padding: 2rem;
   // Center Items
   display: grid;
+  flex-direction: column;
   align-content: center;
   justify-content: center;
+  overflow: scroll;
 
-  > :not(:first-child, :last-child) {
+  > :not(:first-child) {
     margin-top: 3rem;
   }
 
@@ -179,7 +83,7 @@ body::-webkit-scrollbar-button {
   position: relative;
 
   &::before {
-    position: absolute;
+    position: fixed;
     content: "";
     top: 0;
     right: 0;
@@ -197,45 +101,6 @@ body::-webkit-scrollbar-button {
 
   &--post::before {
     opacity: 1;
-  }
-}
-
-.controls {
-  display: flex;
-  justify-content: space-between;
-
-  &__likes {
-    display: flex;
-    flex-direction: column;
-    text-align: center;
-    color: var(--light-color-1);
-  }
-}
-
-.lock {
-  width: 7%;
-
-  > * {
-    fill: var(--light-color-1);
-    transition: transform 0.3s ease-in-out;
-  }
-
-  > .head {
-    transform: translateY(11.09%);
-  }
-
-  > .sbody {
-    transform: translateY(-5.47%);
-  }
-
-  &--open {
-    > .head {
-      transform: translateY(0%);
-    }
-
-    > .sbody {
-      transform: translateY(0%);
-    }
   }
 }
 
