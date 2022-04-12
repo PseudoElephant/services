@@ -8,7 +8,7 @@
     </v-card-title>
 
     <v-card-text class="text-normal">
-      Lorem ipsum dolor sit amet, consectetur adipisicing elit. Enim voluptate inventore voluptates nostrum illum voluptatibus nulla nam, neque excepturi. Exercitationem nihil, aut molestias, expedita possimus ut porro quae beatae officiis suscipit vel amet reprehenderit cum ullam. Delectus, eius mollitia. Excepturi recusandae dicta vero cumque, laudantium perspiciatis fugit id tempora deserunt inventore mollitia ea aut natus eveniet eligendi quasi? Voluptatem atque, explicabo a earum, minima voluptatibus quaerat dolores expedita doloribus ipsum quam enim neque saepe illum quasi beatae. Magni voluptas voluptatem deleniti iusto velit quae saepe, excepturi rem magnam perferendis voluptate nisi provident, ut ipsum pariatur dolorem tenetur mollitia consectetur esse! Laboriosam maiores totam voluptatibus atque nesciunt dignissimos ad voluptatum consequatur neque dolor aliquid voluptatem laudantium numquam est amet eaque, repudiandae voluptate, quo reiciendis commodi, perferendis veniam unde velit dicta? Laudantium, mollitia, minima necessitatibus aperiam architecto sapiente vitae earum debitis, corrupti doloribus saepe enim quibusdam facilis in quasi veritatis consectetur? Officia, aperiam! Quo, facilis a unde exercitationem dignissimos beatae mollitia sit fugiat quibusdam eos, accusamus eveniet id illum! Nam modi exercitationem atque sunt in ut quibusdam assumenda, deleniti error esse hic earum provident quidem velit molestiae! Quo modi eveniet nesciunt aspernatur sint ullam vel architecto recusandae totam, incidunt, provident at voluptatem illo quas. Tenetur quibusdam beatae qui ex aspernatur exercitationem dignissimos quam ratione voluptates praesentium voluptatibus adipisci perferendis non saepe minus iure doloribus laudantium dolores cumque, nobis eius iste officiis. A, numquam perferendis. At accusantium velit quisquam quis ea cupiditate, rem porro eos eveniet sunt eum enim necessitatibus a quibusdam deserunt. Minima voluptate, illo unde fugiat fuga fugit necessitatibus iusto voluptatum dolor ex, dignissimos cupiditate ad numquam inventore? Deleniti labore suscipit dolor modi iusto optio a quisquam iure molestias, laudantium blanditiis alias sint explicabo sit delectus distinctio animi nobis? Atque voluptatum dolorem sapiente inventore aliquam est nobis asperiores corrupti cupiditate excepturi.
+     {{ secret.message }}
      </v-card-text>
 
     <v-card-actions>
@@ -16,24 +16,50 @@
 
     </v-card-actions>
 
+    <v-btn icon @click="back" class="back-btn"> <v-icon> mdi-arrow-left </v-icon> </v-btn>
+    <v-progress-linear dark v-if="loading" indeterminate></v-progress-linear>
   </v-card>
 </template>
 
 <script lang="ts">
 import Vue from "vue";
 import Controls from "@/components/Controls.vue"
+import { mapActions, mapState } from "vuex";
 
 export default Vue.extend({
     name: "SecretCard",
     components: {
       Controls
+    },
+      computed: {
+          ...mapState("secrets", ["secret"]),
+          ...mapState("config", [ "loading" ])
+    },
+    methods: {
+      ...mapActions("secrets", ["fetchSecret"]),
+      back() {
+          this.$emit("back");
+      }
+    },
+    beforeMount() {
+      this.fetchSecret()
     }
 })
 </script>
 
-
-
 <style lang="scss">
+.v-progress-linear__indeterminate--active {
+  background-color: var(--light-color-1);
+}
+</style>
+
+<style lang="scss" scoped>
+
+.back-btn {
+  position: absolute;
+  left: 0%;
+  top: 0%;
+}
 
 .secret-card {
   height: fit-content;

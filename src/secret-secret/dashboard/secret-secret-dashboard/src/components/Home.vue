@@ -6,11 +6,13 @@
       ><span>Secret</span>
     </div>
  
+  <div>
     <!-- Secret Secret Textarea -->
-    <CreateSecret v-if="creatingSecret" @sent="sentSecret" />
-
-    <SecretCard v-else />
-
+     <transition  name="fade">
+      <CreateSecret  v-if="creatingSecret"  @sent="() => creatingSecret = false" />
+      <SecretCard v-else @back="() => creatingSecret = true"  />
+     </transition>
+</div>
 <!-- Google Ad -->
     <!-- <GoogleAdSense adSlot="2612580659" addFormat="rspv"/> -->
   </div>
@@ -22,7 +24,6 @@ import Lock from "@/components/Lock.vue";
 import SecretCard from "@/components/secrets/SecretCard.vue";
 import CreateSecret from "@/components/secrets/CreateSecret.vue";
 // import GoogleAdSense from "@/components/ads/GoogleAdSense.vue"
-import { mapActions, mapState } from "vuex";
 
 export default Vue.extend({
   name: "Home",
@@ -35,21 +36,28 @@ export default Vue.extend({
   data() {
     return {
       creatingSecret: true,
-      valid: false,
+      valid: false
     };
-  },
-  computed: {
-    ...mapState("config", ["loading"]),
-  },
-  methods: {
-    sentSecret() {
-      this.creatingSecret = false;
-    },
   }
 });
 </script>
 
 <style lang="scss">
+
+.fade-enter-active {
+  transition: opacity 0.5s ease-in-out;
+
+}
+
+.fade-enter-to  {
+  opacity: 1;
+
+}
+
+.fade-enter, .fade-leave{
+  opacity: 0;
+}
+
 
 .v-btn > .v-btn__content .v-icon {
   color: var(--light-color-1) !important;
@@ -64,9 +72,8 @@ export default Vue.extend({
 
   padding: 2rem;
   // Center Items
-  display: grid;
-  flex-direction: column;
-  align-content: center;
+  display: inline-grid;
+  // align-content: center;
   justify-content: center;
   overflow: scroll;
 
@@ -106,6 +113,7 @@ export default Vue.extend({
 
 .title {
   // Apply to all children
+  margin-top: 3rem;
   > * {
     font-size: 4rem;
     font-weight: 600;

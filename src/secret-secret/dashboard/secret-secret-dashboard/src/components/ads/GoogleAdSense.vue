@@ -34,7 +34,10 @@ export default Vue.extend({
   	let timeout = 100;
     this.googleInit = setTimeout(() => {
       if (typeof window !== "undefined")
+      {
         (window.adsbygoogle = window.adsbygoogle || []).push({});
+        return
+      }
     }, timeout);
   },
   destroyed() {

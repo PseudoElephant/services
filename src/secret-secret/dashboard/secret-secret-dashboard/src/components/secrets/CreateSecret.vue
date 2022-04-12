@@ -15,7 +15,7 @@
         v-model="value"
       />
     </v-form>
-    <v-btn class="submit-btn" :disabled="!valid" @click="createSecret">Submit</v-btn>
+    <v-btn class="submit-btn" :disabled="!valid" @click="createSecretRequest">Submit</v-btn>
  </div>
 </template>
 
@@ -46,9 +46,9 @@ methods: {
 
       return true;
     },
-    createSecret() : void {
-      // this.createSecret()
-      console.log("Creating Secret")
+    createSecretRequest() : void {
+      this.createSecret({ message: this.value});
+      console.log("creating")
       this.$emit("sent");
     }
     
