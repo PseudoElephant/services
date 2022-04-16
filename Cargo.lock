@@ -519,11 +519,12 @@ dependencies = [
 
 [[package]]
 name = "cookie"
-version = "0.11.4"
+version = "0.16.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "80f6044740a4a516b8aac14c140cdf35c1a640b1bd6b98b6224e49143b2f1566"
+checksum = "94d4706de1b0fa5b132270cddffa8585166037822e260a944fe161acd137ca05"
 dependencies = [
- "time 0.1.44",
+ "time 0.3.9",
+ "version_check",
 ]
 
 [[package]]
@@ -1366,7 +1367,7 @@ dependencies = [
  "serde",
  "serde_json",
  "simple_logger",
- "time 0.1.44",
+ "time 0.3.9",
  "tokio 1.17.0",
 ]
 

@@ -1,23 +1,22 @@
 <template>
-    <LockIcon :class="['lock', { 'lock--open': opened }]" />
+  <LockIcon :class="['lock', { 'lock--open': opened }]" />
 </template>
 
 <script lang="ts">
 import Vue from "vue";
-import LockIcon from "@/assets/icons/OpenLock.svg"
+import LockIcon from "@/assets/icons/OpenLock.svg";
 
 export default Vue.extend({
-    name: "Lock",
-    components: {
-        LockIcon
+  name: "Lock",
+  components: {
+    LockIcon,
+  },
+  props: {
+    opened: {
+      type: Boolean,
     },
-    props: {
-       opened : {
-           type: Boolean,
-
-       }
-    }  
-})
+  },
+});
 </script>
 
 <style lang="scss">
@@ -47,5 +46,4 @@ export default Vue.extend({
     }
   }
 }
-
 </style>

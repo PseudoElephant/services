@@ -2,7 +2,7 @@ import { call, put, StrictEffect, takeLatest } from "redux-saga/effects";
 import { BASE_API } from "@/config/constants";
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 // fetchRandomSecret retrieves a random secret from the backend
-function* fetchRandomSecret(): Generator<StrictEffect> {
+export function* fetchRandomSecret(): Generator<StrictEffect> {
   try {
     // setLoading
     yield put({ type: "config/setLoading", payload: true });
@@ -11,6 +11,7 @@ function* fetchRandomSecret(): Generator<StrictEffect> {
       method: "get",
       baseURL: BASE_API,
       url: "/secrets",
+      withCredentials: true,
     };
     // making request
     const response = (yield call(
@@ -30,7 +31,7 @@ function* fetchRandomSecret(): Generator<StrictEffect> {
   }
 }
 
-function* createSecret(
+export function* createSecret(
   request: DispatchOutput<Secret>
 ): Generator<StrictEffect> {
   try {
@@ -43,6 +44,7 @@ function* createSecret(
       },
       baseURL: BASE_API,
       url: "/secrets",
+      withCredentials: true,
     };
 
     // making request

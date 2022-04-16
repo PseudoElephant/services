@@ -19,6 +19,7 @@ declare interface State {
 // Config State
 declare interface ConfigState {
   loading: boolean;
+  cookiePreference: ?boolean;
 }
 
 interface DispatchOutput<T> {

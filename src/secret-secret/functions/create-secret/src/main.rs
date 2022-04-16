@@ -20,7 +20,6 @@ struct Request {
 #[serde(rename_all = "snake_case")]
 struct RequestPayload {
     message: String,
-    user_id: Option<String>,
 }
 
 #[tokio::main]
@@ -55,13 +54,13 @@ fn handle_err(err: Error) -> Result<ApiGatewayProxyResponse, Error> {
 }
 
 fn create_cookie<'a>(value: String) -> Cookie<'a> {
-    let cookie = Cookie::build("user_id", value)
-        .path("/secrets")
+    let cookie = Cookie::build("UID", value)
+        .path("/")
         .secure(true)
         .http_only(true) // Two weeks
+        .same_site(cookie::SameSite::None)
         .max_age(time::Duration::days(14))
         .finish();
-
     return cookie;
 }
 
@@ -84,11 +83,11 @@ async fn process(req: Request) -> Result<ApiGatewayProxyResponse, Error> {
 
     let default = &http::HeaderValue::from_str("invalid=FFF").unwrap();
     // try to get cookie | could use get_all to get many cookies
-    let user_cookies: &http::HeaderValue = req.event.headers.get("set-cookie").unwrap_or(default);
+    let user_cookies: &http::HeaderValue = req.event.headers.get("cookie").unwrap_or(default);
 
     let cookie: cookie::Cookie = cookie::Cookie::parse(user_cookies.to_str().unwrap_or(""))?;
 
-    let user_id: Option<String> = if cookie.name() == "user_id" {
+    let user_id: Option<String> = if cookie.name() == "UID" {
         Some(String::from(cookie.value()))
     } else {
         None
@@ -184,7 +183,10 @@ mod tests {
     #[tokio::test]
     async fn test_handler_success_w_cookie() {
         let mut headers = HeaderMap::new();
-        headers.insert("set-cookie", "user_id=98981fb6-a128-459e-95c6-4d6d84f23bca; HttpOnly; Secure; Path=/secrets; Max-Age=1209600".parse().unwrap());
+        headers.insert(
+            "Cookie",
+            "UID=98981fb6-a128-459e-95c6-4d6d84f23bca;".parse().unwrap(),
+        );
         let apigw = ApiGatewayProxyRequest {
             headers: headers,
             body: Some(
@@ -231,6 +233,19 @@ mod tests {
             response.headers.get("Content-Type").unwrap(),
             "application/json"
         );
+
+        let data: &aws_lambda_events::encodings::Body = &response.body.unwrap_or_default();
+
+        match data {
+            aws_lambda_events::encodings::Body::Text(text) => {
+                let secret: models::secrets::Secret = serde_json::from_str(text).unwrap();
+                assert_eq!(
+                    secret.user_id.unwrap().to_string(),
+                    "98981fb6-a128-459e-95c6-4d6d84f23bca"
+                );
+            }
+            _ => panic!("Body should be text!"),
+        }
 
         assert_eq!(response.headers.get("set-cookie"), None)
     }

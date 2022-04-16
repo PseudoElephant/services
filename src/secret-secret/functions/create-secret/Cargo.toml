@@ -23,8 +23,8 @@ aws-config = "0.9.0"
 aws-sdk-sqs = "0.9.0"
 async-trait = "0.1"
 aws-types = "0.9.0"
-cookie = "0.11.0"
-time = "0.1.40"
+cookie = "0.16.0"
+time = "0.3.0"
 # LOCAL DEPENDENCIES
 models = { package = "secret-secret_models" , path = "../../models"}
 sqs = { package = "aws-sqs" , path = "../../../shared/aws/sqs"}
